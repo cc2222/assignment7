@@ -12,6 +12,7 @@ public class ServerMain {
 	
 	private ArrayList<PrintWriter> clientOutputStreams;
 	private ArrayList<BufferedReader> clientInputStreams;
+	private int clients = 0;
 
 	public static void main(String[] args) {
 		try {
@@ -34,7 +35,9 @@ public class ServerMain {
 			BufferedReader reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 			clientOutputStreams.add(writer);
 			clientInputStreams.add(reader);
-
+			writer.println(clients);
+			writer.flush();
+			clients++;
 			Thread t = new Thread(new ClientHandler(clientSocket));
 			t.start();
 			System.out.println("got a connection");
@@ -69,5 +72,4 @@ public class ServerMain {
 			}
 		}
 	}
-
 }
