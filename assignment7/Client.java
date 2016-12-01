@@ -27,8 +27,10 @@ public class Client extends Application{
 	//private JTextField outgoing; 
 	private BufferedReader reader; 
 	private PrintWriter writer;
-	private String clientnm;
+	//private String clientnm;
 	private static int clients;
+	private int recipient = 4;
+	private int sender = 4;
 	private int clientid;
 	private TextArea ta;
 	private TextField tf;
@@ -43,7 +45,7 @@ public class Client extends Application{
 	}
 	
 	public Client(String nm){
-		clientnm = nm;
+		//clientnm = nm;
 		//clientid = clients;
 		//clients++;
 	}
@@ -56,6 +58,7 @@ public class Client extends Application{
 	public void start(Stage primaryStage) { 
 		try{
 			setUpNetworking();
+			//clientnm = "Client " + clientid;
 		}catch(Exception e){
 			System.out.println("Error in setUpNetworking()");
 		}
@@ -86,12 +89,12 @@ public class Client extends Application{
         ArrayList<RadioButton> radios = new ArrayList<RadioButton>();
         for(String x : names)
         {
-//        	if(x.equals(name))
-//			{
-//        		names.remove(x);
-//			}
-//        	else
-//        	{
+        	if(x.equals("Client " + clientid))
+			{
+        		
+			}
+        	else
+        	{
         		RadioButton cl = new RadioButton();
         		radios.add(cl);
     			cl.setText(x);
@@ -102,7 +105,7 @@ public class Client extends Application{
     	      //cl.setDisable(true);
     	        
     	        top.getChildren().add(cl);
-//        	}
+        	}
         }
         
         for(RadioButton y : radios)
@@ -158,7 +161,7 @@ public class Client extends Application{
 
 		tf.setOnAction(e -> { 
 			try { 
-				writer.println(clientid + ": " + tf.getText()); 
+				writer.println(recipient + "" + sender + "" + clientid + ": " + tf.getText()); 
 				writer.flush();
 				tf.setText(""); 
 				tf.requestFocus();
@@ -172,11 +175,21 @@ public class Client extends Application{
 	public String updateActive(ArrayList<RadioButton> all)
 	{
 		String active = "";
+		int count = 0;
 		for(RadioButton temp : all)
 		{
 			if(temp.isSelected())
 			{
-				active = active + temp.getText() + " + ";  
+				count++;
+				active = active + temp.getText() + " + "; 
+				if(count > 1){
+					recipient = 3;
+				}
+				else{
+					String s = temp.getText();
+					s = s.substring(s.length()-1,s.length());
+					recipient = Integer.parseInt(s);
+				}
 			}	
 		}
 		if(!active.equals(""))
@@ -187,13 +200,14 @@ public class Client extends Application{
 	}
 	
 	private void setUpNetworking() throws Exception {
-		@SuppressWarnings("resource") Socket sock = new Socket("172.16.18.207", 4242); 
+		@SuppressWarnings("resource") Socket sock = new Socket("127.0.0.1", 4242); 
 		InputStreamReader streamReader = new InputStreamReader(sock.getInputStream());
 		reader = new BufferedReader(streamReader); 
 		writer = new PrintWriter(sock.getOutputStream()); 
 		System.out.println("networking established"); 
 		String s = reader.readLine();
 		clientid = Integer.parseInt(s);
+		sender = clientid;
 		Thread readerThread = new Thread(new IncomingReader()); 
 		readerThread.start();
 	}

@@ -13,6 +13,8 @@ public class ServerMain {
 	private ArrayList<PrintWriter> clientOutputStreams;
 	private ArrayList<BufferedReader> clientInputStreams;
 	private int clients = 0;
+	private int recipient;
+	private int sender;
 
 	public static void main(String[] args) {
 		try {
@@ -45,10 +47,21 @@ public class ServerMain {
 	}
 
 	private void notifyClients(String message) {
-		for (PrintWriter writer : clientOutputStreams) {
-			writer.println("Client " + message);
-			writer.flush();
+		if(recipient == 3){
+			for (PrintWriter writer : clientOutputStreams) {
+				writer.println("Client " + message);
+				writer.flush();
+			}
+			return;
+		}	
+		for(int a = 0; a < clientOutputStreams.size(); a++){
+			if(a == recipient || a == sender){
+				PrintWriter writer = clientOutputStreams.get(a);
+				writer.println("Client " + message);
+				writer.flush();
+			}
 		}
+		
 	}
 
 	class ClientHandler implements Runnable {
@@ -63,7 +76,12 @@ public class ServerMain {
 			String message;
 			try {
 				while ((message = reader.readLine()) != null) {
-					System.out.println("read " + message);
+					String s = message.substring(0,1);
+					recipient = Integer.parseInt(s);
+					s = message.substring(1,2);
+					sender = Integer.parseInt(s);
+					message = message.substring(2,message.length());
+					System.out.println("read " + message);			
 					notifyClients(message);
 				}
 			} 
